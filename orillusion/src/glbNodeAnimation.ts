@@ -10,7 +10,7 @@
  * - localRotQuat 회전을 인라인 set() 대신 setter 할당으로 변경해 dirty 플래그 보장
  * - GLB 이중 fetch 방지를 위한 모듈 레벨 캐시 추가
  */
-import { ComponentBase, Object3D, View3D, Time, Quaternion } from '@orillusion/core'
+import { ComponentBase, Object3D, View3D, Time, Quaternion } from './lib/orillusion.js'
 
 // ── 타입 상수 ─────────────────────────────────────────────────────────────
 

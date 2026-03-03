@@ -38,7 +38,7 @@ import {
   AnimatorComponent,
   MeshRenderer,
   webGPUContext,
-} from '@orillusion/core'
+} from './lib/orillusion.js'
 import { parseGLBNodeAnimation, GLBNodeAnimationComponent } from './glbNodeAnimation'
 import { markStep, setStatus } from './loadTimeline'
 
