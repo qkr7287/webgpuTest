@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Web Host - 3D 임베드 테스트 (Orillusion)</title>
+  <script>
+    window.__PAGE_START = performance.now();
+  </script>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #070a12;
+      --panel: rgba(255, 255, 255, 0.08);
+      --panel2: rgba(255, 255, 255, 0.06);
+      --border: rgba(255, 255, 255, 0.14);
+      --text: rgba(255, 255, 255, 0.92);
+      --muted: rgba(255, 255, 255, 0.7);
+      --accent: #7c9cff;
+      --danger: #ff6b6b;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+    }
+
+    body {
+      background: radial-gradient(1200px 900px at 20% 10%, rgba(102, 153, 255, 0.22), transparent 60%),
+        radial-gradient(1000px 700px at 80% 0%, rgba(160, 255, 210, 0.14), transparent 55%),
+        var(--bg);
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Arial, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(10px);
+    }
+
+    .title__main {
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      font-size: 14px;
+    }
+
+    .title__sub {
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 12.5px;
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .btn--secondary {
+      background: rgba(124, 156, 255, 0.12);
+    }
+
+    .layout {
+      height: calc(100vh - 57px);
+      padding: 14px;
+      display: flex;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .canvasPanel {
+      position: relative;
+      flex: 1;
+      min-width: 0;
+      min-height: 0;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      background: var(--panel2);
+    }
+
+    #renderCanvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      touch-action: none;
+      outline: none;
+    }
+
+    .status {
+      white-space: pre-line;
+      position: absolute;
+      left: 12px;
+      bottom: 12px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      backdrop-filter: blur(10px);
+      font-size: 12px;
+      color: var(--muted);
+      max-width: min(720px, calc(100% - 24px));
+    }
+
+    .status--error {
+      color: var(--danger);
+    }
+
+    /* 로딩 단계 타임라인 */
+    .loadTimeline {
+      flex-shrink: 0;
+      width: 280px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--panel);
+      padding: 12px 14px;
+      overflow: auto;
+    }
+
+    .loadTimeline__title {
+      font-weight: 700;
+      font-size: 12px;
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+
+    .loadTimeline__steps {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .loadTimeline__step {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background: var(--panel2);
+      border: 1px solid transparent;
+      font-size: 11px;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .loadTimeline__step--done {
+      border-color: var(--accent);
+      background: rgba(124, 156, 255, 0.08);
+    }
+
+    .loadTimeline__label {
+      color: var(--muted);
+      flex: 1;
+      min-width: 0;
+      line-height: 1.35;
+    }
+
+    .loadTimeline__step--done .loadTimeline__label {
+      color: var(--text);
+    }
+
+    .loadTimeline__ms {
+      flex-shrink: 0;
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+      color: var(--accent);
+      font-size: 12px;
+    }
+
+    .loadTimeline__step:not(.loadTimeline__step--done) .loadTimeline__ms {
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .loadTimeline__ref {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    .loadTimeline__ref code {
+      font-size: 10px;
+      background: var(--panel2);
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
+
+    /* 오버레이: 스탯·설정 (기존 유지) */
+    #stats-panel,
+    #ip-panel {
+      position: absolute;
+      z-index: 100;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: rgba(0, 0, 0, 0.8);
+      color: var(--text);
+      font-size: 13px;
+      display: none;
+    }
+
+    #stats-panel.visible,
+    #ip-panel.visible {
+      display: block;
+    }
+
+    #stats-panel {
+      top: 12px;
+      left: 12px;
+      min-width: 200px;
+    }
+
+    #stats-panel .row {
+      margin-bottom: 6px;
+    }
+
+    #stats-panel .row:last-child {
+      margin-bottom: 0;
+    }
+
+    #stats-panel .label {
+      color: var(--muted);
+      margin-right: 8px;
+    }
+
+    #stats-panel .value {
+      color: #0f0;
+      font-family: monospace;
+    }
+
+    #stats-panel .buttons {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+    }
+
+    #stats-panel button {
+      padding: 8px 14px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      background: #333;
+      color: #fff;
+    }
+
+    #stats-panel button:hover {
+      background: #444;
+    }
+
+    #stats-panel button.add {
+      background: #1a5f1a;
+    }
+
+    #stats-panel button.remove {
+      background: #6b2020;
+    }
+
+    #ip-panel {
+      bottom: 12px;
+      left: 12px;
+      right: 12px;
+      max-width: 420px;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    #ip-panel h3 {
+      margin: 0 0 10px 0;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    #ip-panel .ip-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    #ip-panel .ip-row label {
+      flex: 0 0 110px;
+      color: var(--muted);
+    }
+
+    #ip-panel .ip-row input[type="range"] {
+      flex: 1;
+      min-width: 80px;
+    }
+
+    #ip-panel .ip-row input[type="number"] {
+      width: 56px;
+      padding: 4px 6px;
+      background: #333;
+      border: 1px solid #555;
+      border-radius: 4px;
+      color: var(--text);
+    }
+  </style>
+</head>
+
+<body>
+  <header class="topbar">
+    <div class="title">
+      <div class="title__main">Web Host (Orillusion)</div>
+      <div class="title__sub">
+        아래 캔버스는 <span id="remote-url" class="mono">/src/main.ts + @orillusion/core</span> 로 렌더링합니다.
+      </div>
+    </div>
+    <div class="actions">
+      <button id="btn-connect" class="btn" disabled>연결(임베드)</button>
+      <button id="btn-disconnect" class="btn btn--secondary" disabled>해제(Dispose)</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="canvasPanel">
+      <canvas id="renderCanvas" style="width:100%;height:100%"></canvas>
+      <div id="status" class="status" role="status" aria-live="polite">대기 중… 연결을 시작하면 로딩 단계가 갱신됩니다.</div>
+      <div id="stats-panel">
+        <div class="row"><span class="label">로딩 시간</span><span id="stats-loading-time" class="value">--</span></div>
+        <div class="row"><span class="label">FPS</span><span id="stats-fps" class="value">--</span></div>
+        <div class="row"><span class="label">인스턴스</span><span id="stats-instance-count" class="value">0</span></div>
+        <div class="buttons">
+          <button type="button" class="add" id="btn-add">Add</button>
+          <button type="button" class="remove" id="btn-remove">Remove</button>
+        </div>
+      </div>
+      <div id="ip-panel">
+        <h3>Orillusion 렌더 설정</h3>
+        <div class="ip-row"><label>skyExposure</label><input type="range" id="ip-sky-exposure" min="0" max="8"
+            step="0.05" value="0.7" /><input type="number" id="ip-sky-exposure-n" step="0.05" value="0.7" /></div>
+        <div class="ip-row"><label>Sky Box Exposure</label><input type="range" id="ip-skybox-exposure" min="0" max="8"
+            step="0.05" value="0.7" /><input type="number" id="ip-skybox-exposure-n" step="0.05" value="0.7" /></div>
+        <div class="ip-row"><label>Sky Box Roughness</label><input type="range" id="ip-skybox-roughness" min="0" max="1"
+            step="0.01" value="0.45" /><input type="number" id="ip-skybox-roughness-n" step="0.01" value="0.45" /></div>
+        <div class="ip-row"><label>Post Processing</label><input type="checkbox" id="ip-post-enabled" checked /></div>
+        <div class="ip-row"><label>Bloom Intensity</label><input type="range" id="ip-bloom-intensity" min="0" max="10"
+            step="0.05" value="1" /><input type="number" id="ip-bloom-intensity-n" step="0.05" value="1" /></div>
+        <div class="ip-row"><label>TAA (지터)</label><input type="checkbox" id="ip-taa-enabled" checked /></div>
+      </div>
+    </section>
+    <aside class="loadTimeline" aria-label="로딩 단계">
+      <div class="loadTimeline__title">로딩 단계</div>
+      <ol class="loadTimeline__steps">
+        <li id="step-0" class="loadTimeline__step loadTimeline__step--done"><span class="loadTimeline__label">0. 페이지 진입
+            (Document)</span><span class="loadTimeline__ms" data-ms="0">0 ms</span></li>
+        <li id="step-1" class="loadTimeline__step"><span class="loadTimeline__label">1. host 앱 로드 (main.ts,
+            Vite)</span><span class="loadTimeline__ms">—</span></li>
+        <li id="step-2" class="loadTimeline__step"><span class="loadTimeline__label">2. 자동 연결 시작</span><span
+            class="loadTimeline__ms">—</span></li>
+        <li id="step-3" class="loadTimeline__step"><span class="loadTimeline__label">3. 원격 모듈 로드 (embed)</span><span
+            class="loadTimeline__ms">—</span></li>
+        <li id="step-4" class="loadTimeline__step"><span class="loadTimeline__label">4. Orillusion 엔진 init</span><span
+            class="loadTimeline__ms">—</span></li>
+        <li id="step-5" class="loadTimeline__step"><span class="loadTimeline__label">5. mount (GLB·HDR 요청)</span><span
+            class="loadTimeline__ms">—</span></li>
+        <li id="step-6" class="loadTimeline__step"><span class="loadTimeline__label">6. ready (프레임 안정화)</span><span
+            class="loadTimeline__ms">—</span></li>
+      </ol>
+      <div class="loadTimeline__ref">기준: 페이지 진입 시점 (<code>__PAGE_START</code>)</div>
+    </aside>
+  </main>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+
+</html>
