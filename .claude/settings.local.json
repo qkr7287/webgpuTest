@@ -11,7 +11,11 @@
       "Bash(npx vite:*)",
       "Bash(npm:*)",
       "Bash(head:*)",
-      "Bash(npx patch-package:*)"
+      "Bash(npx patch-package:*)",
+      "WebFetch(domain:webllm.mlc.ai)",
+      "WebSearch",
+      "WebFetch(domain:www.npmjs.com)",
+      "WebFetch(domain:github.com)"
     ]
   }
 }

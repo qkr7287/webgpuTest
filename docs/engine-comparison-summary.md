@@ -556,7 +556,12 @@ Network 탭에서 `free_cyberpunk_hovercar.glb`의 Time만 비교:
 
 ## 6. WebLLM 사용기
 
-> TODO: WebLLM 테스트 결과 추가 필요
+[WebLLM](https://webllm.mlc.ai/)은 **브라우저 안에서 LLM을 직접 실행**하는 추론 엔진이다.
+서버 없이 WebGPU로 GPU 가속 추론을 수행한다.
+
+상세 내용은 별도 문서 참고: [`webllm/docs/webllm-overview.md`](../webllm/docs/webllm-overview.md)
+
+> TODO: 직접 테스트 후 사용기 추가 예정
 
 ---
 
