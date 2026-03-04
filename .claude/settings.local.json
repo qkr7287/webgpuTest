@@ -1,7 +1,17 @@
 {
   "permissions": {
     "allow": [
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(npx esbuild:*)",
+      "Bash(taskkill:*)",
+      "Bash(curl:*)",
+      "Bash(wc:*)",
+      "Bash(npm install:*)",
+      "Bash(rm:*)",
+      "Bash(npx vite:*)",
+      "Bash(npm:*)",
+      "Bash(head:*)",
+      "Bash(npx patch-package:*)"
     ]
   }
 }
