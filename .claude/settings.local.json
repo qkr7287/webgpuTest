@@ -15,7 +15,9 @@
       "WebFetch(domain:webllm.mlc.ai)",
       "WebSearch",
       "WebFetch(domain:www.npmjs.com)",
-      "WebFetch(domain:github.com)"
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(mkdir:*)"
     ]
   }
 }

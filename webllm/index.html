@@ -18,7 +18,7 @@
 
     /* ── 헤더 ────────────────────────────────── */
     header {
-      padding: 16px 24px;
+      padding: 12px 24px;
       background: #1a1a2e;
       border-bottom: 1px solid #333;
       display: flex;
@@ -29,10 +29,94 @@
     header h1 {
       font-size: 18px;
       color: #4fc3f7;
+      white-space: nowrap;
     }
     #status {
       font-size: 13px;
       color: #999;
+      flex: 1;
+    }
+
+    /* ── GPU 상태 ─────────────────────────────── */
+    #gpu-info {
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+    .gpu-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      flex-shrink: 0;
+    }
+    .gpu-dot.active { background: #66bb6a; box-shadow: 0 0 6px #66bb6a88; }
+    .gpu-dot.inactive { background: #f44336; box-shadow: 0 0 6px #f4433688; }
+    .gpu-dot.checking { background: #ff9800; animation: pulse 1s infinite; }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    #gpu-label { color: #888; }
+    #gpu-detail { color: #4fc3f7; }
+
+    /* ── 모델 선택 바 ────────────────────────── */
+    .model-bar {
+      padding: 10px 24px;
+      background: #151520;
+      border-bottom: 1px solid #2a2a3a;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
+    .model-bar label {
+      font-size: 13px;
+      color: #aaa;
+      white-space: nowrap;
+    }
+    #model-select {
+      flex: 1;
+      min-width: 200px;
+      max-width: 500px;
+      background: #222;
+      border: 1px solid #444;
+      border-radius: 6px;
+      color: #e0e0e0;
+      padding: 8px 10px;
+      font-size: 13px;
+      font-family: inherit;
+    }
+    #model-select:focus {
+      outline: none;
+      border-color: #4fc3f7;
+    }
+    #load-btn {
+      padding: 8px 16px;
+      background: #ff9800;
+      color: #000;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    #load-btn:hover:not(:disabled) {
+      background: #ffa726;
+    }
+    #load-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    #model-desc {
+      width: 100%;
+      font-size: 12px;
+      color: #777;
+      padding-top: 2px;
     }
 
     /* ── 프로그레스 바 ────────────────────────── */
@@ -180,7 +264,19 @@
   <header>
     <h1>WebLLM Test</h1>
     <div id="status">초기화 중...</div>
+    <div id="gpu-info">
+      <span class="gpu-dot checking"></span>
+      <span id="gpu-label">WebGPU:</span>
+      <span id="gpu-detail">확인 중...</span>
+    </div>
   </header>
+
+  <div class="model-bar">
+    <label for="model-select">모델:</label>
+    <select id="model-select"></select>
+    <button id="load-btn">모델 로드</button>
+    <div id="model-desc"></div>
+  </div>
 
   <div id="progress">
     <div class="progress-track">
@@ -188,7 +284,7 @@
     </div>
   </div>
 
-  <div id="model-info">모델 로딩 대기 중...</div>
+  <div id="model-info">모델을 선택하고 "모델 로드" 버튼을 누르세요</div>
 
   <div id="chat-messages"></div>
 
