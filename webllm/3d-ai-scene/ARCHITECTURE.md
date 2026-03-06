@@ -5,6 +5,50 @@
 자연어로 3D 씬을 조작하는 브라우저 애플리케이션.
 WebLLM(WebGPU)으로 LLM 추론, Three.js(WebGL)로 3D 렌더링을 수행하며, 서로 다른 GPU 파이프라인을 사용하여 충돌 없이 동시 동작한다.
 
+## Pipeline Overview
+
+사용자 입력이 3D Canvas에 반영되기까지의 전체 파이프라인.
+
+```mermaid
+graph TD
+    User["사용자 입력<br/>'빨간 공을 만들어'"]
+
+    User --> Main
+
+    subgraph MainThread["Main Thread"]
+        Main["main.ts<br/>(Orchestrator)"]
+    end
+
+    Main -->|postMessage| Worker
+
+    subgraph WorkerThread["Web Worker"]
+        Worker["worker.ts<br/>(LLM 추론)"]
+    end
+
+    Worker -->|"streaming response<br/>'빨간 공을 만들었습니다!<br/>---CMD---<br/>{action:create, shape:sphere, color:#ff0000}'"| Main
+
+    Main --> ChatUI & CmdParser
+
+    subgraph Output["Response Handling"]
+        ChatUI["Chat UI<br/>(텍스트 표시)"]
+        CmdParser["commands.ts<br/>(---CMD--- 파싱 + JSON 추출)"]
+    end
+
+    CmdParser -->|SceneCommand| Scene
+
+    Scene["scene.ts<br/>(Three.js SceneManager)"]
+
+    Scene --> Canvas["3D Canvas"]
+
+    style User fill:#ff9800,color:#000
+    style Worker fill:#1a2e1a,color:#fff
+    style Main fill:#1a3a5c,color:#fff
+    style ChatUI fill:#2a2a2a,color:#e0e0e0
+    style CmdParser fill:#2a2a2a,color:#e0e0e0
+    style Scene fill:#1a3a5c,color:#fff
+    style Canvas fill:#4fc3f7,color:#000
+```
+
 ## System Architecture
 
 ```mermaid
